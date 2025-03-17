@@ -41,3 +41,17 @@
 #define EXTERNAL_FLASH_SECTOR_SIZE 4096
 #define EXTERNAL_FLASH_BLOCK_SIZE 4096
 #define EXTERNAL_FLASH_SIZE (256 * 1024) // 2M-bit flash size
+
+// Custom configs for my keymap
+#define TAPPING_TERM 500
+
+
+//Reducing BACKING SIZE for no error with linking when compile
+#undef WEAR_LEVELING_BACKING_SIZE
+#define WEAR_LEVELING_BACKING_SIZE 1024
+
+// Turn off lights when PC sleep
+#define RGB_MATRIX_SLEEP
+
+// Turn on caps world when 2 shifts pressed
+#define BOTH_SHIFTS_TURNS_ON_CAPS_WORD
