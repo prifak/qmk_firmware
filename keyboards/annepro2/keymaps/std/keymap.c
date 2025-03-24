@@ -15,33 +15,16 @@
   */
 
  #include QMK_KEYBOARD_H
-
+ #include "quantum.h"
  enum anne_pro_layers {
      BASE,
      FN1,
      FN2,
  };
 
- //TAP hold f1->f12 declarations
  enum {
-     TH_F1,
-     TH_F2,
-     TH_F3,
-     TH_F4,
-     TH_F5,
-     TH_F6,
-     TH_F7,
-     TH_F8,
-     TH_F9,
-     TH_F10,
-     TH_F11,
-     TH_F12,
+     CT_CLN,
  };
-
- enum custom_keycodes {
-     WIN_LCK,
- };
-
  // clang-format off
  // Key symbols are based on QMK. Use them to remap your keyboard
  /*
@@ -57,26 +40,14 @@
   * |-----------------------------------------------------------------------------------------+
   * | Ctrl  |  L1   |  Alt  |               space             |  Alt  |  FN2  |  F12  | Ctrl  |
   * \-----------------------------------------------------------------------------------------/
-  * Layer TAP in BASE
-  * ,-----------------------------------------------------------------------------------------.
-  * |     | F1  |  F2 | F3  | F4  | F5  | F6  | F7  | F8  |  F9 | F10 | F11 | F12 |           |
-  * |-----------------------------------------------------------------------------------------+
-  * |        |     |     |     |     |     |     |     |     |     |     |     |     |        |
-  * |-----------------------------------------------------------------------------------------+
-  * |         |     |     |     |     |     |     |     |     |     |     |     |             |
-  * |-----------------------------------------------------------------------------------------+
-  * |            |     |     |     |     |     |     |     |     |     |     |                |
-  * |-----------------------------------------------------------------------------------------+
-  * |       |       |       |                                 |       |       |       |       |
-  * \-----------------------------------------------------------------------------------------/
   */
  const uint16_t keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      [BASE] = LAYOUT_60_ansi( /* Base */
-     KC_ESC,           TD(TH_F1),    TD(TH_F2),    TD(TH_F3),    TD(TH_F4),     TD(TH_F5),           TD(TH_F6),          TD(TH_F7), TD(TH_F8), TD(TH_F9),    TD(TH_F10),   TD(TH_F11),       TD(TH_F12),    KC_BSPC,
-     KC_TAB,           KC_Q,         KC_W,         KC_E,         KC_R,          KC_T,                KC_Y,               KC_U,      KC_I,      KC_O,         KC_P,         KC_LBRC,          KC_RBRC,       KC_BSLS,
-     MO(FN1),          KC_A,         KC_S,         KC_D,         KC_F,          KC_G,                KC_H,               KC_J,      KC_K,      KC_L,         KC_SCLN,      KC_QUOT,          KC_ENT,
-     KC_LSFT,          KC_Z,         KC_X,         KC_C,         KC_V,          KC_B,                KC_N,               KC_M,      KC_COMM,   KC_DOT,       KC_SLSH,      KC_RSFT,
-     KC_LCTL,          KC_LGUI,      KC_LALT,      KC_SPC,       KC_RALT,       MO(FN2),             KC_F12,             KC_RCTL
+     KC_ESC,        KC_1,       KC_2,       KC_3,       KC_4,       KC_5,       KC_6,       KC_7,       KC_8,       KC_9,       KC_0,       LT(FN1, KC_MINUS),       KC_EQUAL,       KC_BSPC,
+     KC_TAB,        KC_Q,       KC_W,       KC_E,       KC_R,       KC_T,       KC_Y,       KC_U,       KC_I,       KC_O,       KC_P,       KC_LBRC,        KC_RBRC,        KC_BSLS,
+     MO(FN1),       KC_A,       KC_S,       KC_D,       KC_F,       KC_G,       KC_H,       KC_J,       KC_K,       KC_L,       KC_SCLN,    KC_QUOT,        KC_ENT,
+     KC_LSFT,       KC_Z,       KC_X,       KC_C,       KC_V,       KC_B,       KC_N,       KC_M,       KC_COMM,    KC_DOT,     KC_SLSH,    KC_RSFT,
+     KC_LCTL,       KC_LGUI,    KC_LALT,    KC_SPC,     KC_RALT,    MO(FN2),    KC_F12,     KC_RCTL
      ),
      /*
       * Layer FN1
@@ -118,21 +89,15 @@
      [FN2] = LAYOUT_60_ansi( /* FN2 */
      KC_AP2_BT_UNPAIR, KC_AP2_BT1, KC_AP2_BT2, KC_AP2_BT3, KC_AP2_BT4, KC_AP_RGB_TOG,     KC_AP_RGB_MOD,  RGB_HUI, RGB_HUD, RGB_SAI,  RGB_SAD, KC_AP_RGB_VAI, KC_AP_RGB_VAD, KC_DEL,
      _______,          KC_BTN1,    KC_MS_U,    KC_BTN2,    KC_WH_U,    _______,           _______,        _______, RGB_SPI, RGB_SPD,  KC_PSCR,       KC_HOME,       KC_END,        _______,
-     _______,          KC_MS_L,    KC_MS_D,    KC_MS_R,    KC_WH_D,    _______,           _______,        _______, _______, WIN_LCK,  KC_PGUP,       KC_PGDN,       _______,
+     _______,          KC_MS_L,    KC_MS_D,    KC_MS_R,    KC_WH_D,    _______,           _______,        _______, _______, _______,  KC_PGUP,       KC_PGDN,       _______,
      _______,          _______,    _______,    _______,    _______,    _______,           _______,        _______, AC_TOGG, KC_INS,   KC_DEL,        _______,
-     _______,          _______,    _______,                                               _______,                   _______,         MO(FN1),       MO(FN2),       _______
-     ),
+     _______,          _______,    _______,                                               _______,                   _______,         MO(FN1),       MO(FN2),       CT_CLN
+    )
  };
  // clang-format on
 
 
 
-
-
-
-
-
- //BIG FUCK TAP HOLD FUNCTION IMPLEMENTARY
  typedef struct {
      uint16_t tap;
      uint16_t hold;
@@ -143,91 +108,12 @@
      tap_dance_action_t *action;
 
      switch (keycode) {
-         case TD(TH_F1):  // list all tap dance keycodes with tap-hold configurati
+         case TD(CT_CLN):  // list all tap dance keycodes with tap-hold configurations
              action = &tap_dance_actions[QK_TAP_DANCE_GET_INDEX(keycode)];
              if (!record->event.pressed && action->state.count && !action->state.finished) {
                  tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)action->user_data;
                  tap_code16(tap_hold->tap);
-             }; break;
-         case TD(TH_F2):  // list all tap dance keycodes with tap-hold configurati
-             action = &tap_dance_actions[QK_TAP_DANCE_GET_INDEX(keycode)];
-             if (!record->event.pressed && action->state.count && !action->state.finished) {
-                 tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)action->user_data;
-                 tap_code16(tap_hold->tap);
-             }; break;
-         case TD(TH_F3):  // list all tap dance keycodes with tap-hold configurati
-             action = &tap_dance_actions[QK_TAP_DANCE_GET_INDEX(keycode)];
-             if (!record->event.pressed && action->state.count && !action->state.finished) {
-                 tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)action->user_data;
-                 tap_code16(tap_hold->tap);
-             }; break;
-         case TD(TH_F4):  // list all tap dance keycodes with tap-hold configurati
-             action = &tap_dance_actions[QK_TAP_DANCE_GET_INDEX(keycode)];
-             if (!record->event.pressed && action->state.count && !action->state.finished) {
-                 tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)action->user_data;
-                 tap_code16(tap_hold->tap);
-             }; break;
-         case TD(TH_F5):  // list all tap dance keycodes with tap-hold configurati
-             action = &tap_dance_actions[QK_TAP_DANCE_GET_INDEX(keycode)];
-             if (!record->event.pressed && action->state.count && !action->state.finished) {
-                 tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)action->user_data;
-                 tap_code16(tap_hold->tap);
-             }; break;
-         case TD(TH_F6):  // list all tap dance keycodes with tap-hold configurati
-             action = &tap_dance_actions[QK_TAP_DANCE_GET_INDEX(keycode)];
-             if (!record->event.pressed && action->state.count && !action->state.finished) {
-                 tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)action->user_data;
-                 tap_code16(tap_hold->tap);
-             }; break;
-         case TD(TH_F7):  // list all tap dance keycodes with tap-hold configurati
-             action = &tap_dance_actions[QK_TAP_DANCE_GET_INDEX(keycode)];
-             if (!record->event.pressed && action->state.count && !action->state.finished) {
-                 tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)action->user_data;
-                 tap_code16(tap_hold->tap);
-             }; break;
-         case TD(TH_F8):  // list all tap dance keycodes with tap-hold configurati
-             action = &tap_dance_actions[QK_TAP_DANCE_GET_INDEX(keycode)];
-             if (!record->event.pressed && action->state.count && !action->state.finished) {
-                 tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)action->user_data;
-                 tap_code16(tap_hold->tap);
-             }; break;
-         case TD(TH_F9):  // list all tap dance keycodes with tap-hold configurati
-             action = &tap_dance_actions[QK_TAP_DANCE_GET_INDEX(keycode)];
-             if (!record->event.pressed && action->state.count && !action->state.finished) {
-                 tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)action->user_data;
-                 tap_code16(tap_hold->tap);
-             }; break;
-         case TD(TH_F10):  // list all tap dance keycodes with tap-hold configurati
-             action = &tap_dance_actions[QK_TAP_DANCE_GET_INDEX(keycode)];
-             if (!record->event.pressed && action->state.count && !action->state.finished) {
-                 tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)action->user_data;
-                 tap_code16(tap_hold->tap);
-             }; break;
-         case TD(TH_F11):  // list all tap dance keycodes with tap-hold configurati
-             action = &tap_dance_actions[QK_TAP_DANCE_GET_INDEX(keycode)];
-             if (!record->event.pressed && action->state.count && !action->state.finished) {
-                 tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)action->user_data;
-                 tap_code16(tap_hold->tap);
-             }; break;
-         case TD(TH_F12):  // list all tap dance keycodes with tap-hold configurati
-             action = &tap_dance_actions[QK_TAP_DANCE_GET_INDEX(keycode)];
-             if (!record->event.pressed && action->state.count && !action->state.finished) {
-                 tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)action->user_data;
-                 tap_code16(tap_hold->tap);
-             }; break;
-
-     }
-
-
-     switch (keycode) {
-         case WIN_LCK:
-             if (record->event.pressed) {
-                 // when macro is pressed
-                 SEND_STRING(SS_LGUI("l"));
-             } else {
-                 // when macro is released
              }
-             break;
      }
      return true;
  }
@@ -263,22 +149,5 @@
  { .fn = {NULL, tap_dance_tap_hold_finished, tap_dance_tap_hold_reset}, .user_data = (void *)&((tap_dance_tap_hold_t){tap, hold, 0}), }
 
  tap_dance_action_t tap_dance_actions[] = {
-     [TH_F1] = ACTION_TAP_DANCE_TAP_HOLD(KC_1, KC_F1),
-     [TH_F2] = ACTION_TAP_DANCE_TAP_HOLD(KC_2, KC_F2),
-     [TH_F3] = ACTION_TAP_DANCE_TAP_HOLD(KC_3, KC_F3),
-     [TH_F4] = ACTION_TAP_DANCE_TAP_HOLD(KC_4, KC_F4),
-     [TH_F5] = ACTION_TAP_DANCE_TAP_HOLD(KC_5, KC_F5),
-     [TH_F6] = ACTION_TAP_DANCE_TAP_HOLD(KC_6, KC_F6),
-     [TH_F7] = ACTION_TAP_DANCE_TAP_HOLD(KC_7, KC_F7),
-     [TH_F8] = ACTION_TAP_DANCE_TAP_HOLD(KC_8, KC_F8),
-     [TH_F9] = ACTION_TAP_DANCE_TAP_HOLD(KC_9, KC_F9),
-     [TH_F10] = ACTION_TAP_DANCE_TAP_HOLD(KC_0, KC_F10),
-     [TH_F11] = ACTION_TAP_DANCE_TAP_HOLD(KC_MINUS, KC_F11),
-     [TH_F12] = ACTION_TAP_DANCE_TAP_HOLD(KC_EQUAL, KC_F12),
+     [CT_CLN] = ACTION_TAP_DANCE_TAP_HOLD(KC_COLN, KC_SCLN),
  };
- // END OF BIG FUCK TAP HOLD
-
- //MACRO IMPLEMENTARY
-
-
-

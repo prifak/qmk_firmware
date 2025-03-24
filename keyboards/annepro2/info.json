@@ -13,7 +13,7 @@
         "driver": "wear_leveling",
         "wear_leveling": {
             "driver": "spi_flash",
-            "backing_size": 2048
+            "backing_size": 1024
         }
     },
     "features": {

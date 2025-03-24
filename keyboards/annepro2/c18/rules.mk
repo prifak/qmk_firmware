@@ -20,13 +20,4 @@ SRC = \
 	protocol.c \
 	rgb_driver.c \
 
-
-# Custom rules for my keymap
-TAP_DANCE_ENABLE = yes  # Tap-hold
-MOUSEKEY_ENABLE = yes  # Mouse implementation
-NKRO_ENABLE = yes    # Enabling All keys to work
-EXTRAKEY_ENABLE = yes  # Audio control and System control
-BOOTMAGIC_ENABLE = yes      # Enable Bootmagic Lite
-AUTOCORRECT_ENABLE = yes   # Autocorrect
-SEND_STRING_ENABLE = yes  # Macrosses can send strings
-CAPS_WORD_ENABLE = yes    # Activating CAPS for 5 second
+TAP_DANCE_ENABLE = yes
