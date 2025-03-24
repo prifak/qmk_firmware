@@ -23,7 +23,18 @@
  };
 
  enum {
-     CT_CLN,
+     TH_F1,
+     TH_F2,
+     TH_F3,
+     TH_F4,
+     TH_F5,
+     TH_F6,
+     TH_F7,
+     TH_F8,
+     TH_F9,
+     TH_F10,
+     TH_F11,
+     TH_F12
  };
  // clang-format off
  // Key symbols are based on QMK. Use them to remap your keyboard
@@ -43,7 +54,7 @@
   */
  const uint16_t keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      [BASE] = LAYOUT_60_ansi( /* Base */
-     KC_ESC,        KC_1,       KC_2,       KC_3,       KC_4,       KC_5,       KC_6,       KC_7,       KC_8,       KC_9,       KC_0,       LT(FN1, KC_MINUS),       KC_EQUAL,       KC_BSPC,
+     KC_ESC,        TD(TH_F1),  TD(TH_F2),  TD(TH_F3),  TD(TH_F4),  TD(TH_F5),  TD(TH_F6),  TD(TH_F7),  TD(TH_F8),  TD(TH_F9),  TD(TH_F10), TD(TH_F11),     TD(TH_F12),     KC_BSPC,
      KC_TAB,        KC_Q,       KC_W,       KC_E,       KC_R,       KC_T,       KC_Y,       KC_U,       KC_I,       KC_O,       KC_P,       KC_LBRC,        KC_RBRC,        KC_BSLS,
      MO(FN1),       KC_A,       KC_S,       KC_D,       KC_F,       KC_G,       KC_H,       KC_J,       KC_K,       KC_L,       KC_SCLN,    KC_QUOT,        KC_ENT,
      KC_LSFT,       KC_Z,       KC_X,       KC_C,       KC_V,       KC_B,       KC_N,       KC_M,       KC_COMM,    KC_DOT,     KC_SLSH,    KC_RSFT,
@@ -91,63 +102,86 @@
      _______,          KC_BTN1,    KC_MS_U,    KC_BTN2,    KC_WH_U,    _______,           _______,        _______, RGB_SPI, RGB_SPD,  KC_PSCR,       KC_HOME,       KC_END,        _______,
      _______,          KC_MS_L,    KC_MS_D,    KC_MS_R,    KC_WH_D,    _______,           _______,        _______, _______, _______,  KC_PGUP,       KC_PGDN,       _______,
      _______,          _______,    _______,    _______,    _______,    _______,           _______,        _______, AC_TOGG, KC_INS,   KC_DEL,        _______,
-     _______,          _______,    _______,                                               _______,                   _______,         MO(FN1),       MO(FN2),       CT_CLN
+     _______,          _______,    _______,                                               _______,                   _______,         MO(FN1),       MO(FN2),       _______
     )
  };
  // clang-format on
 
 
 
- typedef struct {
-     uint16_t tap;
-     uint16_t hold;
-     uint16_t held;
- } tap_dance_tap_hold_t;
+typedef struct {
+    uint16_t tap;
+    uint16_t hold;
+    uint16_t held;
+} tap_dance_tap_hold_t;
 
- bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-     tap_dance_action_t *action;
+void tap_dance_tap_hold_finished(tap_dance_state_t *state, void *user_data) {
+    tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)user_data;
 
-     switch (keycode) {
-         case TD(CT_CLN):  // list all tap dance keycodes with tap-hold configurations
-             action = &tap_dance_actions[QK_TAP_DANCE_GET_INDEX(keycode)];
-             if (!record->event.pressed && action->state.count && !action->state.finished) {
-                 tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)action->user_data;
-                 tap_code16(tap_hold->tap);
-             }
-     }
-     return true;
- }
+    if (state->pressed) {
+        if (state->count == 1
+            #ifndef PERMISSIVE_HOLD
+            && !state->interrupted
+            #endif
+        ) {
+            register_code16(tap_hold->hold);
+            tap_hold->held = tap_hold->hold;
+        } else {
+            register_code16(tap_hold->tap);
+            tap_hold->held = tap_hold->tap;
+        }
+    }
+}
 
- void tap_dance_tap_hold_finished(tap_dance_state_t *state, void *user_data) {
-     tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)user_data;
+void tap_dance_tap_hold_reset(tap_dance_state_t *state, void *user_data) {
+    tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)user_data;
 
-     if (state->pressed) {
-         if (state->count == 1
-             #ifndef PERMISSIVE_HOLD
-             && !state->interrupted
-             #endif
-         ) {
-             register_code16(tap_hold->hold);
-             tap_hold->held = tap_hold->hold;
-         } else {
-             register_code16(tap_hold->tap);
-             tap_hold->held = tap_hold->tap;
-         }
-     }
- }
+    if (tap_hold->held) {
+        unregister_code16(tap_hold->held);
+        tap_hold->held = 0;
+    }
+}
 
- void tap_dance_tap_hold_reset(tap_dance_state_t *state, void *user_data) {
-     tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)user_data;
+#define ACTION_TAP_DANCE_TAP_HOLD(tap, hold) \
+    { .fn = {NULL, tap_dance_tap_hold_finished, tap_dance_tap_hold_reset}, .user_data = (void *)&((tap_dance_tap_hold_t){tap, hold, 0}), }
 
-     if (tap_hold->held) {
-         unregister_code16(tap_hold->held);
-         tap_hold->held = 0;
-     }
- }
+tap_dance_action_t tap_dance_actions[] = {
+    [TH_F1] = ACTION_TAP_DANCE_TAP_HOLD(KC_1, KC_F1),
+    [TH_F2] = ACTION_TAP_DANCE_TAP_HOLD(KC_2, KC_F2),
+    [TH_F3] = ACTION_TAP_DANCE_TAP_HOLD(KC_3, KC_F3),
+    [TH_F4] = ACTION_TAP_DANCE_TAP_HOLD(KC_4, KC_F4),
+    [TH_F5] = ACTION_TAP_DANCE_TAP_HOLD(KC_5, KC_F5),
+    [TH_F6] = ACTION_TAP_DANCE_TAP_HOLD(KC_6, KC_F6),
+    [TH_F7] = ACTION_TAP_DANCE_TAP_HOLD(KC_7, KC_F7),
+    [TH_F8] = ACTION_TAP_DANCE_TAP_HOLD(KC_8, KC_F8),
+    [TH_F9] = ACTION_TAP_DANCE_TAP_HOLD(KC_9, KC_F9),
+    [TH_F10] = ACTION_TAP_DANCE_TAP_HOLD(KC_0, KC_F10),
+    [TH_F11] = ACTION_TAP_DANCE_TAP_HOLD(KC_MINUS, KC_F11),
+    [TH_F12] = ACTION_TAP_DANCE_TAP_HOLD(KC_EQUAL, KC_F12),
 
- #define ACTION_TAP_DANCE_TAP_HOLD(tap, hold) \
- { .fn = {NULL, tap_dance_tap_hold_finished, tap_dance_tap_hold_reset}, .user_data = (void *)&((tap_dance_tap_hold_t){tap, hold, 0}), }
+};
 
- tap_dance_action_t tap_dance_actions[] = {
-     [CT_CLN] = ACTION_TAP_DANCE_TAP_HOLD(KC_COLN, KC_SCLN),
- };
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    tap_dance_action_t *action;
+
+    switch (keycode) {
+        case TD(TH_F1):
+        case TD(TH_F2):
+        case TD(TH_F3):
+        case TD(TH_F4):
+        case TD(TH_F5):
+        case TD(TH_F6):
+        case TD(TH_F7):
+        case TD(TH_F8):
+        case TD(TH_F9):
+        case TD(TH_F10):
+        case TD(TH_F11):
+        case TD(TH_F12):  // list all tap dance keycodes with tap-hold configurations
+            action = &tap_dance_actions[QK_TAP_DANCE_GET_INDEX(keycode)];
+            if (!record->event.pressed && action->state.count && !action->state.finished) {
+                tap_dance_tap_hold_t *tap_hold = (tap_dance_tap_hold_t *)action->user_data;
+                tap_code16(tap_hold->tap);
+            }
+    }
+    return true;
+}
