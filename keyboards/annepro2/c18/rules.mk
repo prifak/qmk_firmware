@@ -21,3 +21,4 @@ SRC = \
 	rgb_driver.c \
 
 TAP_DANCE_ENABLE = yes
+CAPS_WORD_ENABLE = yes
