@@ -43,5 +43,3 @@
 #define EXTERNAL_FLASH_SIZE (256 * 1024) // 2M-bit flash size
 
 
-#define TAPPING_TERM 200
-#define BOTH_SHIFTS_TURNS_ON_CAPS_WORD
